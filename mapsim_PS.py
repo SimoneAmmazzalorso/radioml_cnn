@@ -28,6 +28,7 @@ parser.add_argument("--alpha_low", type=float, help="lower power-law index for 2
 parser.add_argument("--alpha_up", type=float, help="upper power-law index for 2-halo term", default=1.0)
 parser.add_argument("--theta_min", type=float, help="theta min (deg)", default=0.01)
 parser.add_argument("--theta_max", type=float, help="theta max (deg)", default=2.0)
+parser.add_argument("--norm", action='store_true', help="apply normalization.")
 
 args = parser.parse_args()
 tag = args.tag
@@ -42,9 +43,9 @@ alpha_low = args.alpha_low
 alpha_up = args.alpha_up
 theta_min = args.theta_min
 theta_max = args.theta_max
+norm = args.norm
 
 def normalization(moll_array):
-    #moll_array[np.isinf(moll_array)] = 0.0
     moll_array = moll_array + np.abs(np.min(moll_array))
     moll_array = moll_array/(np.max(moll_array))*255.0
     return moll_array
@@ -52,21 +53,18 @@ def normalization(moll_array):
 #path
 path='/home/simone/RadioML/data/'
 #path = '/archive/home/sammazza/radioML/data/'
+
 #power spectrum files; assumed to be normalized with l*(l+1)/(2 Pi)
 in_1halo = 'Cl_radio_2.dat'
 in_2halo = 'Cl_radio_1.dat'
 
 ###Geneal options
-#Number of maps to be produced
-#N_start=0
-#N_stop=2
-#map tag in order to distinguish them from other runs, otherwise set None
-#tag='test'
 #Healpix size
 NSIDE = 1024
 #multipole range
 l_start = 5
 l_stop = 1500
+#size of tif image
 x_size = 2000
 y_size = x_size/2
 
@@ -100,14 +98,6 @@ if out_dir is not '' and out_dir[-1] is not '/':
 
 def read_PS(path,in_1halo,in_2halo,ll,norm):
     cl1 = np.genfromtxt(path+in_1halo)
-    '''
-    print('l file:')
-    print(cl1[:,0])
-    print('l fine:')
-    print(ll)
-    print('norm:')
-    print(norm)
-    '''
     cl1_interp = interp1d(np.log(cl1[:,0]),np.log(cl1[:,1]))
     cl1_fine = np.exp(cl1_interp(np.log(ll)))*norm
     cl2 = np.genfromtxt(path+in_2halo)
@@ -115,24 +105,6 @@ def read_PS(path,in_1halo,in_2halo,ll,norm):
     cl2_fine = np.exp(cl2_interp(np.log(ll)))*norm
     cl_tot = cl1_fine+cl2_fine
     cl_tot = np.insert(cl_tot,0,np.zeros(l_start))
-    #check Cl
-    #cl=1.e-11*(ll)**(-2.)+1.e-13
-    #plt.plot(ll,cl)
-    '''
-    #TEST PS reading and interpolation
-    n_1=2.*np.pi/(cl1[:,0]*(cl1[:,0]+1))
-    n_2=2.*np.pi/(cl2[:,0]*(cl2[:,0]+1))
-    plt.plot(cl1[:,0],cl1[:,1]*n_1)
-    plt.plot(cl2[:,0],cl2[:,1]*n_2)
-    plt.plot(ll,cl1_fine)
-    plt.plot(ll,cl2_fine)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.savefig(path+'test.png')
-    plt.show()
-    print('here')
-    exit()
-    '''
     return cl_tot,np.insert(cl1_fine,0,np.zeros(l_start)),np.insert(cl2_fine,0,np.zeros(l_start))
 cl_tot,cl_1h,cl_2h = read_PS(path,in_1halo,in_2halo,ll,norm)
 
@@ -161,24 +133,6 @@ for i in range(N_start,N_stop):
     cl_temp = cl_1h_temp+cl_2h_temp
     cl_list.append(cl_temp)
 
-    '''
-    #TEST PS modification
-    plt.plot(np.arange(len(cl_1h_temp)),cl_1h_temp,linestyle='dotted',color='orange')
-    plt.plot(np.arange(len(cl_2h_temp)),cl_2h_temp,linestyle='dashed',color='orange')
-    plt.plot(np.arange(len(cl_temp)),cl_temp,color='orange')
-    plt.plot(np.arange(len(cl_1h)),cl_1h,linestyle='dotted',color='blue')
-    plt.plot(np.arange(len(cl_2h)),cl_2h,linestyle='dashed',color='blue')
-    plt.plot(np.arange(len(cl_1h)),cl_1h+cl_2h,color='blue')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlim(xmin=l_start)
-    #plt.xlim(xmin=10,xmax=1400)
-    #plt.ylim(ymin=1.e-10,ymax=5.e-6)
-    #plt.show()
-    plt.savefig(path+out_dir+'test.png')
-    exit()
-    '''
-
     print('Writing Power Spectrum...')
     out_cl = out_dir+'Cl_'+tag+str(N_start)+'_'+str(N_stop)+'_label.dat'
     np.savetxt(path+out_cl, np.transpose(cl_list), header=text_cl, fmt='%1.4e')
@@ -186,16 +140,6 @@ for i in range(N_start,N_stop):
     print('Converting Power Spectrum to CCF...')
     for j in range(len(th_list)):
         cl_trans.append(np.sum(cl_temp[l_start:]*pl[j]*A))
-
-    '''
-    #TEST transform to CCF
-    plt.plot(th_list,cl_trans)
-    plt.xscale('log')
-    plt.yscale('log')
-    #plt.show()
-    plt.savefig(path+out_dir+'test.png')
-    exit()
-    '''
 
     print('Writing CCF...')
     CCF_list.append(cl_trans)
@@ -209,39 +153,19 @@ for i in range(N_start,N_stop):
     print('Saving map...')
     hp.write_map(path+out_name,msim,coord='G',fits_IDL=False,overwrite=True)
 
-    '''
-    #TEST PS with normalized map
-    test = hp.anafast(normalization(msim),lmax=1500)
-    print(test)
-    print(cl_temp)
-    fact=255.0/(np.max(msim))
-    fact=1.0
-    fact=test[100]/cl_temp[100]
-    print(fact)
-    plt.plot(np.arange(len(test)),test)
-    plt.plot(np.arange(len(cl_temp)),cl_temp*fact,color='orange')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlim(xmin=l_start,xmax=1400)
-    #plt.show()
-    plt.savefig(path+out_dir+'test.png')
-    exit()
-    '''
-
     print('Converting map to tif format...')
     moll_array = hp.cartview(msim, title=None, xsize=x_size, ysize=y_size, return_projected_map=True)
-    moll_array = normalization(moll_array)
+    if norm:
+        print('Applying normalization to map...')
+        moll_array = normalization(moll_array)
     moll_array = np.array(moll_array, dtype=np.uint8)
     moll_image = Image.fromarray(moll_array)
 
     print('Saving tif map...')
     out_tif = out_dir+'msim_'+tag+str(i).zfill(4)+'_data.tif'
     moll_image.save(path+out_tif)
-    #out_png = out_dir+'msim_'+tag+str(i).zfill(4)+'_data.png'
-    #moll_image.save(path+out_png)
 
     print('Writing parameters file...')
-    #print text
     f.write(text)
     f.close()
     sub.call(['cp',path+out_text_temp,path+out_text],) #shell=[bool])
