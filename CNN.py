@@ -2,36 +2,56 @@ import numpy as np
 import glob
 from PIL import Image
 import h5py
+import argparse
 
 from utility import image_provider
 from utility import network
 
-# paths of images and path of the spectra.dat-file
-#path = '/home/simone/RadioML/'
-path = '/archive/home/sammazza/radioML/'
-path_train_data = path+'data/mapsim_PS/'
-path_train_label = path+'data/mapsim_PS/CCF_test_0_100_label.dat'
-path_results = path+'results/'
+parser = argparse.ArgumentParser()
+parser.add_argument("--tag", type=str, help="tag of the data run", default='')
+parser.add_argument("--tag_res", type=str, help="tag of the network results", default='')
+parser.add_argument("--path", type=str, help="general path of CNN and test results", default='')
+parser.add_argument("--path_TD", type=str, help="path of training data (.tif files)", default='')
+parser.add_argument("--path_TL", type=str, help="path of training label (correlation function)", default='')
+parser.add_argument("--N_start", type=int, help="start number of the maps", default=0)
+parser.add_argument("--N_stop", type=int, help="end number of the maps", default=0)
+parser.add_argument("--N_epochs", type=int, help="number of epochs (default = 10)", default=10)
+parser.add_argument("--LR", type=float, help="learning rate", default=1.e-5)
+parser.add_argument("--batch_size", type=int, help="batch_size (default = 10)", default=10)
+parser.add_argument("--train", action='store_true', help="train the CNN")
+parser.add_argument("--norm_label", action='store_true', help="normalization of labels")
+parser.add_argument("--norm_data", action='store_true', help="normalization of data")
 
-tag='test'
-tag_res='test'
+args = parser.parse_args()
+tag = args.tag
+tag_res = args.tag_res
+path = args.path
+path_train_data = args.path_TD
+path_train_label = args.path_TL
+train = args.train
+LR = args.LR
+norm_label = args.norm_label
+norm_data = args.norm_data
 
 if tag is not '':
-   tag=tag+'_'
+   tag = tag+'_'
 
-if tag_res is not '':
-   tag_res='_'+tag_res
+if tag is not '':
+   tag_res = tag_res + '_'
+
+# paths of images and path of the spectra.dat-file
+path_train_label = path_train_label+'CCF_'+tag+str(N_start)+'_'+str(N_stop)+'_label.dat'
+path_model = path+'saved_model/'
+path_results = path+'results/'
 
 ##########################################################
 ## Parameters ############################################
-train = True
+N_epochs = args.N_epochs
+batch_size = args.batch_size
 
-N_epochs = 10
-batch_size = 10
-
-model_parameters = {'learning_rate': 1E-5,      # 1E-5
+model_parameters = {'learning_rate': LR,      # 1E-5
                        'decay_rate': 1E-5,      # 1E-4 # i.e. lr /= (1+decay_rate) after each epoch
-                      'kernel_size': (5,5), 
+                      'kernel_size': (5,5),
                         'pool_size': (4,4),
                            'stride': 1
                     }
@@ -88,17 +108,18 @@ if len(all_labels)!=len(all_IDs):
    exit()
 
 # norming the labels to values from 0...y_max
-y_max = 1.0
-max_value_label = np.max(all_labels)
-all_labels = all_labels*y_max
-all_labels = all_labels/max_value_label
+if norm_label:
+    y_max = 1.0
+    max_value_label = np.max(all_labels)
+    all_labels = all_labels*y_max
+    all_labels = all_labels/max_value_label
 
 # Creating a dictionary that associates the right correlation function to each ID
-# labels = {'msim_0000_data': [0.082, 0.20930, ....]], 
-#           'msim_0001_data': [0.082, 0.20930, ....]], 
+# labels = {'msim_0000_data': [0.082, 0.20930, ....]],
+#           'msim_0001_data': [0.082, 0.20930, ....]],
 #           ....}
 
-labels = {} 
+labels = {}
 for k,label in enumerate(all_IDs):
     labels[label] = all_labels[k]
 
@@ -120,14 +141,13 @@ generator_parameters = {'path_data': path_train_data,
               'dim': (n_x, n_y),
               'N_out': N_out,
               'batch_size': batch_size,
-              'norm': False}
+              'norm': norm_data}
 
 # Definitions of the generators
 print('Definition of generators...')
 training_generator   = image_provider.DataGenerator(partition['train'], labels, shuffle=True, **generator_parameters)
 validation_generator = image_provider.DataGenerator(partition['validation'], labels, shuffle=True, **generator_parameters)
 test_generator = image_provider.DataGenerator(partition['test'], labels, shuffle=False, **generator_parameters)
-# test_generator = image_provider.DataGenerator(partition['train'], labels, shuffle=False, **generator_parameters)
 
 ##########################################################
 ## Model and training ####################################
@@ -136,18 +156,17 @@ test_generator = image_provider.DataGenerator(partition['test'], labels, shuffle
 print('Initializing model...')
 model = network.CNN(N_out, data_shape=data_shape, **model_parameters)
 
-
 if train==True:
     print('Fitting model...')
     # parameters fed into the fit-method
     fit_parameters = {'generator': training_generator,
-                      'validation_data': validation_generator, 
+                      'validation_data': validation_generator,
                       'epochs': N_epochs}
     # training the model
     history = model.fit_generator(**fit_parameters)
 
-    model.save(path+'saved_model/model'+tag_res+'.h5')
-    model.save_weights(path+'saved_model/weights'+tag_res+'.csv')
+    model.save(path_model+'model'+tag_res+'.h5')
+    model.save_weights(path_model+'weights'+tag_res+'.csv')
 
     # Creating a file to store the loss function:
     epochs = np.array(range(1,1+N_epochs))
@@ -155,20 +174,20 @@ if train==True:
 
     #emptyDirectory(path_results)
 
-    with open(path+'loss_function'+tag_res+'.txt','w') as stats:
+    with open(path_model+'loss_function'+tag_res+'.txt','w') as stats:
         stats.write('#Epoch  Loss\n')
 
     for k in range(len(epochs)):
-        with open(path+'loss_function'+tag_res+'.txt','a') as stats:
+        with open(path_model+'loss_function'+tag_res+'.txt','a') as stats:
             stats.write('{:}    {:}\n'.format(epochs[k], loss_values[k]))
 else:
     from keras.models import load_model
     print('Loading weights...')
-    model = load_model(path+'saved_model/model'+tag_res+'.h5')
+    model = load_model(path_model+'model'+tag_res+'.h5')
 
 
-# Testing:
-thetas = np.transpose(np.genfromtxt(path_train_label, dtype=np.float32)[:,:1])[0]
+## Testing ###########################################
+thetas = np.transpose(np.genfromtxt(path_train_label, dtype=np.float32)[:,0])
 print('Running prediction:')
 pred = model.predict_generator(test_generator, verbose=1)
 target = np.asarray([*test_generator.labels.values()])[num2:]     # the * unpacks the dictionary_values-type
@@ -181,9 +200,3 @@ for k in range(target.shape[0]):
     for i in range(len(thetas)):
         with open(path_results+'2-PCF_map_%05d.txt'%(k),'a') as stats:
             stats.write('{:}    {:}    {:}\n'.format(thetas[i], pred[k,i]*max_value_label, target[k,i]*max_value_label))
-
-
-
-
-
-
