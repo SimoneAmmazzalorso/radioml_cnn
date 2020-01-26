@@ -116,7 +116,6 @@ for i in range(N_start,N_stop):
 
     out_text_temp = out_dir+'msim_'+tag+'back.txt'
     f = open(path+out_text_temp,'w')
-
     print('*** Map number:',i)
 
     print('Creating Power Spectrum...')
@@ -140,9 +139,9 @@ for i in range(N_start,N_stop):
     print('Converting Power Spectrum to CCF...')
     for j in range(len(th_list)):
         cl_trans.append(np.sum(cl_temp[l_start:]*pl[j]*A))
+    CCF_list.append(cl_trans)
 
     print('Writing CCF...')
-    CCF_list.append(cl_trans)
     out_CCF = out_dir+'CCF_'+tag+str(N_start)+'_'+str(N_stop)+'_label.dat'
     np.savetxt(path+out_CCF, np.transpose(CCF_list), header=text_CCF, fmt='%1.4e')
 
