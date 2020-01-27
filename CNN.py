@@ -7,6 +7,8 @@ import argparse
 from utility import image_provider
 from utility import network
 
+# bla
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--tag", type=str, help="tag of the data run", default='')
 parser.add_argument("--tag_res", type=str, help="tag of the network results", default='')
