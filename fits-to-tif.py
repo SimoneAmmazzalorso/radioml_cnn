@@ -19,8 +19,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--overwrite", action='store_true', help="overwrite maps.")
 parser.add_argument("--mod", action='store_true', help="apply modification.")
 parser.add_argument("--norm", action='store_true', help="apply normalization.")
-parser.add_argument("--RGB", action='store_true', help="convert to RGB.")
-parser.add_argument("--xsize", type=int, help="xsize of the tif figure.", default=3000)
+parser.add_argument("--rgb", action='store_true', help="convert to RGB.")
+parser.add_argument("--xsize", type=int, help="xsize of the tif figure.", default=2000)
+parser.add_argument("--path", type=str, help="path of source files.", default='')
+parser.add_argument("--path_dest", type=str, help="path of destination files.", default='')
+parser.add_argument("--tag", type=str, help="tag of destination files.", default='')
 
 args = parser.parse_args()
 overwrite = args.overwrite
@@ -28,15 +31,20 @@ mod = args.mod
 norm = args.norm
 rgb = args.rgb
 x_size = args.xsize
+path = args.path
+destinationPath_data = args.path_dest
+tag = args.tag
+
+if tag is not '':
+   tag = tag+'_'
 
 # transform all .fits maps in dircetory into .tif
-path = "/archive/home/sammazza/radioML/data/mapsim_lowN/"
-destinationPath_data = "/archive/home/sammazza/radioML/data/mapsim_tif_data_lowN/"
-destinationPath_label = "/archive/home/sammazza/radioML/data/mapsim_tif_label_lowN/"
+#path = "/archive/home/sammazza/radioML/data/mapsim_lowN/"
+#destinationPath_data = "/archive/home/sammazza/radioML/data/mapsim_tif_data_lowN/"
 
-all_labels = glob.glob(os.path.join(path, "*.fits")) # changed output name for easier identification
+all_images = glob.glob(os.path.join(path, "*.fits")) # changed output name for easier identification
 
-print('There are %i maps in %r'%(len(all_labels), path))
+print('There are %i maps in %r'%(len(all_images), path))
 
 y_size = int(x_size/2)
 print('Producing tif maps of size:',x_size,'X',y_size)
@@ -64,7 +72,7 @@ def normalization(moll_array):
 # changing data
 t_start = time.time()
 for num, path_ in enumerate(all_images):
-    if not os.path.exists(destinationPath_data+'msim_%04i_data.tif'%num) or overwrite:
+    if not os.path.exists(destinationPath_data+'msim_'+tag+'%04i_data.tif'%num) or overwrite:
         image_data = hp.read_map(path_)
         image_data = np.array(image_data, np.float32)
         moll_array = hp.cartview(image_data, title=None, xsize=x_size, ysize=y_size, return_projected_map=True)
@@ -75,8 +83,8 @@ for num, path_ in enumerate(all_images):
         if rgb:
             moll_array = toRGB(moll_array)
         moll_image = Image.fromarray(moll_array)
-        print('Saving to '+destinationPath_data+'msim_%04i_data.tif'%num)
-        moll_image.save(destinationPath_data+'msim_%04i_data.tif'%num)
+        print('Saving to '+destinationPath_data+'msim_'+tag+'%04i_data.tif'%num)
+        moll_image.save(destinationPath_data+'msim_'+tag+'%04i_data.tif'%num)
 
 print('Total elapsed time:',time.time()-t_start,'s')
 print('Done.')

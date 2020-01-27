@@ -201,4 +201,7 @@ for k in range(target.shape[0]):
 
     for i in range(len(thetas)):
         with open(path_results+'2-PCF_map_%05d.txt'%(k),'a') as stats:
-            stats.write('{:}    {:}    {:}\n'.format(thetas[i], pred[k,i]*max_value_label, target[k,i]*max_value_label))
+            if norm_label:
+                stats.write('{:}    {:}    {:}\n'.format(thetas[i], pred[k,i]*max_value_label, target[k,i]*max_value_label))
+            else:
+                stats.write('{:}    {:}    {:}\n'.format(thetas[i], pred[k,i], target[k,i]))
