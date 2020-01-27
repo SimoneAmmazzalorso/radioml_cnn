@@ -42,7 +42,7 @@ if tag is not '':
    tag_res = tag_res + '_'
 
 # paths of images and path of the spectra.dat-file
-path_train_label = path_train_label+'CCF_'+tag+str(N_start)+'_'+str(N_stop)+'_label.dat'
+path_train_label = path_train_label+'CCF_'+tag+str(N_start)+'_'+str(N_stop)+'_label_x1000.dat'
 path_model = path+'saved_model/'
 path_results = path+'results/'
 
