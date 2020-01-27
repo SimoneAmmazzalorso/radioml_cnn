@@ -17,6 +17,7 @@ from PIL import Image
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--tag", type=str, help="tag of the run", default='')
+parser.add_argument("--path", type=str, help="general path", default='')
 parser.add_argument("--out_dir", type=str, help="output directory", default='')
 parser.add_argument("N_start", type=int, help="start number of the map", default=0)
 parser.add_argument("N_stop", type=int, help="end number of the map", default=0)
@@ -28,10 +29,12 @@ parser.add_argument("--alpha_low", type=float, help="lower power-law index for 2
 parser.add_argument("--alpha_up", type=float, help="upper power-law index for 2-halo term", default=1.0)
 parser.add_argument("--theta_min", type=float, help="theta min (deg)", default=0.01)
 parser.add_argument("--theta_max", type=float, help="theta max (deg)", default=2.0)
-parser.add_argument("--norm", action='store_true', help="apply normalization.")
+parser.add_argument("--fact", type=float, help="normalization factor for the correlation function (default = 1.0)", default=1.0)
+parser.add_argument("--norm_tif", action='store_true', help="apply normalization to tif files (values from 0 to 255).")
 
 args = parser.parse_args()
 tag = args.tag
+path = args.path
 out_dir = args.out_dir
 N_start = args.N_start
 N_stop = args.N_stop
@@ -43,7 +46,8 @@ alpha_low = args.alpha_low
 alpha_up = args.alpha_up
 theta_min = args.theta_min
 theta_max = args.theta_max
-norm = args.norm
+fact = args.fact
+norm_tif = args.norm_tif
 
 def normalization(moll_array):
     moll_array = moll_array + np.abs(np.min(moll_array))
@@ -51,7 +55,7 @@ def normalization(moll_array):
     return moll_array
 
 #path
-path='/home/simone/RadioML/data/'
+#path='/home/simone/RadioML/data/'
 #path = '/archive/home/sammazza/radioML/data/'
 
 #power spectrum files; assumed to be normalized with l*(l+1)/(2 Pi)
@@ -83,6 +87,8 @@ pl = []
 for i in range(len(th_list)):
     pl.append(leg(ll,np.cos(np.radians(th_list[i]))))
 
+print('factor for the correlation function:',fact)
+
 if tag is not '':
     text = '#TAG: '+tag+'\n'+'#Maps number: '+str(N_start)+' - '+str(N_stop)+'\n'+'#N1h, N2h, alpha'+'\n'
     text_cl = '#TAG: '+tag+'\n'+'#Maps number: '+str(N_start)+' - '+str(N_stop)+'\n'
@@ -111,7 +117,7 @@ cl_tot,cl_1h,cl_2h = read_PS(path,in_1halo,in_2halo,ll,norm)
 t_start = time.time()
 out_text = out_dir+'msim_'+tag+str(N_start)+'_'+str(N_stop)+'.txt'
 
-for i in range(N_start,N_stop):
+for i in range(N_start,N_stop+1):
     cl_trans = []
 
     out_text_temp = out_dir+'msim_'+tag+'back.txt'
@@ -139,7 +145,7 @@ for i in range(N_start,N_stop):
     print('Converting Power Spectrum to CCF...')
     for j in range(len(th_list)):
         cl_trans.append(np.sum(cl_temp[l_start:]*pl[j]*A))
-    CCF_list.append(cl_trans)
+    CCF_list.append(np.array(cl_trans)*fact)
 
     print('Writing CCF...')
     out_CCF = out_dir+'CCF_'+tag+str(N_start)+'_'+str(N_stop)+'_label.dat'
@@ -154,10 +160,10 @@ for i in range(N_start,N_stop):
 
     print('Converting map to tif format...')
     moll_array = hp.cartview(msim, title=None, xsize=x_size, ysize=y_size, return_projected_map=True)
-    if norm:
+    if norm_tif:
         print('Applying normalization to map...')
         moll_array = normalization(moll_array)
-    moll_array = np.array(moll_array, dtype=np.uint8)
+    #moll_array = np.array(moll_array, dtype=np.uint8)
     moll_image = Image.fromarray(moll_array)
 
     print('Saving tif map...')

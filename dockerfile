@@ -16,4 +16,4 @@ ADD CNN.py /run_CNN/CNN.py
 ADD utility/image_provider.py /run_CNN/utility/image_provider.py
 ADD utility/network.py /run_CNN/utility/network.py
 
-CMD python /run_CNN/CNN.py
+ENTRYPOINT ["python","/run_CNN/CNN.py"]
