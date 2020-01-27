@@ -15,6 +15,7 @@ parser.add_argument("--path_TD", type=str, help="path of training data (.tif fil
 parser.add_argument("--path_TL", type=str, help="path of training label (correlation function)", default='')
 parser.add_argument("--N_start", type=int, help="start number of the maps", default=0)
 parser.add_argument("--N_stop", type=int, help="end number of the maps", default=0)
+parser.add_argument("--max_ID", type=int, help="maximum number of maps", default=-1)
 parser.add_argument("--N_epochs", type=int, help="number of epochs (default = 10)", default=10)
 parser.add_argument("--LR", type=float, help="learning rate", default=1.e-5)
 parser.add_argument("--batch_size", type=int, help="batch_size (default = 10)", default=10)
@@ -34,6 +35,7 @@ train = args.train
 LR = args.LR
 norm_label = args.norm_label
 norm_data = args.norm_data
+max_ID = args.max_ID
 
 if tag is not '':
    tag = tag+'_'
@@ -80,10 +82,11 @@ all_IDs = []  # to store all IDs
 N_files = len(glob.glob(path_train_data+'*_data.tif'))
 for i in range(N_files):
     all_IDs.append('msim_'+tag+'%04d_data'%(i))
+all_IDs = all_IDs[:max_ID]
 
 # Splitting into training/validation/test
-num1 = int(len(all_IDs)-4*batch_size)
-num2 = int(len(all_IDs)-1*batch_size)
+num1 = int(len(all_IDs)-0.15*len(all_IDs))
+num2 = int(len(all_IDs)-0.05*len(all_IDs))
 
 training_IDs = all_IDs[:num1]
 validation_IDs = all_IDs[num1:num2]
@@ -101,7 +104,7 @@ print('   Testing on %i/%i images'
         %(len(partition['test']), len(partition['train'])+len(partition['validation'])+len(partition['test'])))
 
 # Reading the spectra.dat-file and store all spectra
-all_labels = np.transpose(np.genfromtxt(path_train_label, dtype=np.float32)[:,1:])
+all_labels = np.transpose(np.genfromtxt(path_train_label, dtype=np.float32)[:,1:max_ID])
 
 if len(all_labels)!=len(all_IDs):
    print('lenght labels:  lenght data:')
