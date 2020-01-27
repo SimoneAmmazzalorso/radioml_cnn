@@ -140,7 +140,7 @@ for j in range(N_start,N_map):
     plt.plot(ll, cl_real, label='normalized-true')
 
     plt.xlim(xmin=10, xmax=1000)
-    plt.ylim(ymin=1e-3, ymax=10)
+    plt.ylim(ymin=1e-9, ymax=1e-3)
     plt.xscale('log')
     plt.yscale('log')
     plt.legend(loc='upper right')
