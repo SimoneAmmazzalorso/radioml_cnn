@@ -126,7 +126,8 @@ for k,label in enumerate(all_IDs):
     labels[label] = all_labels[k]
 
 # Number of output nodes has to be the number of points in the correlation function
-N_out = len(labels['msim_'+tag+'0000_data'])
+#N_out = len(labels['msim_'+tag+'0000_data'])
+N_out = all_labels[0]
 
 # Read a single image in order to determine the pixel-size
 image = np.array(Image.open(path_train_data+partition['train'][0]+'.tif'))
