@@ -22,6 +22,7 @@ parser.add_argument("--batch_size", type=int, help="batch_size (default = 10)", 
 parser.add_argument("--train", action='store_true', help="train the CNN")
 parser.add_argument("--norm_label", action='store_true', help="normalization of labels")
 parser.add_argument("--norm_data", action='store_true', help="normalization of data")
+parser.add_argument("--suffix", type=str, help="suffix for label file.", default='')
 
 args = parser.parse_args()
 tag = args.tag
@@ -36,15 +37,19 @@ LR = args.LR
 norm_label = args.norm_label
 norm_data = args.norm_data
 max_ID = args.max_ID
+suffix = args.suffix
 
 if tag is not '':
    tag = tag+'_'
 
-if tag is not '':
-   tag_res = tag_res + '_'
+if tag_res is not '':
+   tag_res = '_' + tag_res
+
+if suffix is not '':
+   suffix = '_' + suffix
 
 # paths of images and path of the spectra.dat-file
-path_train_label = path_train_label+'CCF_'+tag+str(N_start)+'_'+str(N_stop)+'_label_x1000.dat'
+path_train_label = path_train_label+'CCF_'+tag+str(N_start)+'_'+str(N_stop)+'_label'+suffix+'.dat'
 path_model = path+'saved_model/'
 path_results = path+'results/'
 
@@ -200,11 +205,11 @@ target = np.asarray([*test_generator.labels.values()])[num2:]     # the * unpack
 
 for k in range(target.shape[0]):
     # printing the outputs
-    with open(path_results+'2-PCF_map_%05d.txt'%(k),'w') as stats:
+    with open(path_results+'2-PCF_map_%05d'+tag_res+'.txt'%(k),'w') as stats:
         stats.write('#theta  pred    target\n')
 
     for i in range(len(thetas)):
-        with open(path_results+'2-PCF_map_%05d.txt'%(k),'a') as stats:
+        with open(path_results+'2-PCF_map_%05d'+tag_res+'.txt'%(k),'a') as stats:
             if norm_label:
                 stats.write('{:}    {:}    {:}\n'.format(thetas[i], pred[k,i]*max_value_label, target[k,i]*max_value_label))
             else:
