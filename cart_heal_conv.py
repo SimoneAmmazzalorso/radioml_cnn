@@ -70,7 +70,7 @@ for k in range(len(th_list)):
 def normalization(moll_array):
     #moll_array[np.isinf(moll_array)] = 0.0
     moll_array = moll_array + np.abs(np.min(moll_array))
-    moll_array = moll_array/(np.max(moll_array))*255.0
+    moll_array = moll_array/(np.max(moll_array))
     return moll_array
 
 #coordinates of the cartesian projection
