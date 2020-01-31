@@ -1,11 +1,14 @@
+#!/usr/bin/env python
+
 import numpy as np
 import glob
 from PIL import Image
 import h5py
 import argparse
+import time
 
 from utility import image_provider
-from utility import network
+from utility import network_refined as network
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--tag", type=str, help="tag of the data run", default='')
@@ -170,6 +173,7 @@ model = network.CNN(N_out, data_shape=data_shape, **model_parameters)
 if train==True:
     print('Fitting model...')
     # parameters fed into the fit-method
+    time_start = time.time()
     fit_parameters = {'generator': training_generator,
                       'validation_data': validation_generator,
                       'epochs': N_epochs}
@@ -191,6 +195,7 @@ if train==True:
     for k in range(len(epochs)):
         with open(path_model+'loss_function'+tag_res+'.txt','a') as stats:
             stats.write('{:}    {:}\n'.format(epochs[k], loss_values[k]))
+    print('Elapsed time:',time.time()-time_start,'s')
 else:
     from keras.models import load_model
     print('Loading weights...')
@@ -203,14 +208,19 @@ print('Running prediction:')
 pred = model.predict_generator(test_generator, verbose=1)
 target = np.asarray([*test_generator.labels.values()])[num2:]     # the * unpacks the dictionary_values-type
 
-for k in range(target.shape[0]):
+#print(tag_res)
+#print(test_generator)
+#print(pred)
+#print(target)
+for k in range(target.shape[0]-1):
     # printing the outputs
-    with open(path_results+'2-PCF_map_%05d'+tag_res+'.txt'%(k),'w') as stats:
+    with open(path_results+'2-PCF_map_%05d.txt'%(k),'w') as stats:
         stats.write('#theta  pred    target\n')
 
     for i in range(len(thetas)):
-        with open(path_results+'2-PCF_map_%05d'+tag_res+'.txt'%(k),'a') as stats:
+        with open(path_results+'2-PCF_map_%05d.txt'%(k),'a') as stats:
             if norm_label:
                 stats.write('{:}    {:}    {:}\n'.format(thetas[i], pred[k,i]*max_value_label, target[k,i]*max_value_label))
             else:
                 stats.write('{:}    {:}    {:}\n'.format(thetas[i], pred[k,i], target[k,i]))
+print('Done.')

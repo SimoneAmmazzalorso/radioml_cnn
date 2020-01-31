@@ -176,9 +176,9 @@ for i in range(N_start,N_stop+1):
     sub.call(['cp',path+out_text_temp,path+out_text],) #shell=[bool])
 
     #print 'Partial time :',time.time()-t_start,'s\n'
-    print '\n'
+    print('\n')
 
 t_stop=time.time()
-print 'Elapsed time for create maps:',t_stop-t_start,'s'
+print('Elapsed time for create maps:',t_stop-t_start,'s')
 
-print 'Done.'
+print('Done.')
