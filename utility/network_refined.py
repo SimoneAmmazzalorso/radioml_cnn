@@ -6,7 +6,7 @@ from keras import activations
 from keras import initializers
 
 
-def CNN(N_output=10, kernel_size=(3,3), stride=1, pool_size=(2,2), data_shape=(32,32,1), learning_rate=1E-4, decay_rate=1E-4):  # this is from the documentation example
+def CNN(N_output=10, kernel_size=(3,3), stride=1, pool_size=(2,2), data_shape=(32,32,1), learning_rate=1E-4, decay_rate=1E-4): 
     act = activations.relu
     padding = 'same'
 
