@@ -8,7 +8,6 @@ import argparse
 import time
 
 from utility import image_provider
-from utility import network_refined as network
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--tag", type=str, help="tag of the data run", default='')
@@ -22,7 +21,11 @@ parser.add_argument("--max_ID", type=int, help="maximum number of maps", default
 parser.add_argument("--N_epochs", type=int, help="number of epochs (default = 10)", default=10)
 parser.add_argument("--LR", type=float, help="learning rate", default=1.e-5)
 parser.add_argument("--batch_size", type=int, help="batch_size (default = 10)", default=10)
+parser.add_argument("--kernel_size", type=int, help="kernel_size (default = 5)", default=5)
+parser.add_argument("--pool_size", type=int, help="pool_size (default = 4)", default=4)
+parser.add_argument("--stride", type=int, help="stride (default = 1)", default=1)
 parser.add_argument("--train", action='store_true', help="train the CNN")
+parser.add_argument("--refined", action='store_true', help="using different kernel size for each layer")
 parser.add_argument("--norm_label", action='store_true', help="normalization of labels")
 parser.add_argument("--norm_data", action='store_true', help="normalization of data")
 parser.add_argument("--suffix", type=str, help="suffix for label file.", default='')
@@ -42,6 +45,14 @@ norm_data = args.norm_data
 max_ID = args.max_ID
 suffix = args.suffix
 
+refined = args.refined
+if refined:
+    print('Using refined network.')
+    from utility import network_refined as network
+else:
+    print('Using base network.')
+    from utility import network
+
 if tag is not '':
    tag = tag+'_'
 
@@ -60,12 +71,15 @@ path_results = path+'results/'
 ## Parameters ############################################
 N_epochs = args.N_epochs
 batch_size = args.batch_size
+KS = args.kernel_size
+PS = args.pool_size
+stride = args.stride
 
 model_parameters = {'learning_rate': LR,      # 1E-5
-                       'decay_rate': 1E-5,      # 1E-5 # i.e. lr /= (1+decay_rate) after each epoch
-                      'kernel_size': (5,5),
-                        'pool_size': (4,4),
-                           'stride': 1
+                       'decay_rate': LR,      # 1E-5 # i.e. lr /= (1+decay_rate) after each epoch
+                      'kernel_size': (KS,KS),
+                        'pool_size': (PS,PS),
+                           'stride': stride
                     }
 ##########################################################
 ##########################################################
@@ -81,9 +95,16 @@ def emptyDirectory(thePath):
             print(e)
 ##########################################################
 ## Setting up the Generators #############################
+#from keras.backend.tensorflow_backend import set_session
+#import tensorflow as tf
+#config = tf.ConfigProto()
+#config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
+#config.log_device_placement = True  # to log device placement (on which device the operation ran)
+#sess = tf.Session(config=config)
+#set_session(sess)  # set this TensorFlow session as the default session for Keras
 
 # Creating the 'partition' dictionary that contains all the image IDs ('msim_0000_data' etc.)
-# divided into a training and validation set
+# divided into a training, validation and test set
 
 all_IDs = []  # to store all IDs
 
@@ -108,7 +129,7 @@ print('Training with %i/%i images'
         %(len(partition['train']), len(partition['train'])+len(partition['validation'])+len(partition['test'])))
 print('Validating on %i/%i images'
         %(len(partition['validation']), len(partition['train'])+len(partition['validation'])+len(partition['test'])))
-print('   Testing on %i/%i images'
+print('Testing on %i/%i images'
         %(len(partition['test']), len(partition['train'])+len(partition['validation'])+len(partition['test'])))
 
 # Reading the spectra.dat-file and store all spectra
@@ -168,9 +189,11 @@ test_generator = image_provider.DataGenerator(partition['test'], labels, shuffle
 
 # Defining the learning model
 print('Initializing model...')
+print(model_parameters)
 model = network.CNN(N_out, data_shape=data_shape, **model_parameters)
 
 if train==True:
+    print(model.summary())
     print('Fitting model...')
     # parameters fed into the fit-method
     time_start = time.time()
@@ -200,6 +223,7 @@ else:
     from keras.models import load_model
     print('Loading weights...')
     model = load_model(path_model+'model'+tag_res+'.h5')
+    print(model.summary())
 
 
 ## Testing ###########################################
