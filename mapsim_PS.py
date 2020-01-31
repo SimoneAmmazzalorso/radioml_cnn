@@ -57,10 +57,6 @@ def normalization(moll_array):
     moll_array = moll_array/(np.max(moll_array))*255.0
     return moll_array
 
-#path
-#path='/home/simone/RadioML/data/'
-#path = '/archive/home/sammazza/radioML/data/'
-
 #power spectrum files; assumed to be normalized with l*(l+1)/(2 Pi)
 in_1halo = 'Cl_radio_2.dat'
 in_2halo = 'Cl_radio_1.dat'
@@ -124,7 +120,7 @@ for i in range(N_start,N_stop+1):
     cl_trans = []
 
     out_text_temp = out_dir+'msim_'+tag+'back.txt'
-    f = open(path+out_text_temp,'w')
+    f = open(out_text_temp,'w')
     print('*** Map number:',i)
 
     print('Creating Power Spectrum...')
@@ -143,7 +139,7 @@ for i in range(N_start,N_stop+1):
 
     print('Writing Power Spectrum...')
     out_cl = out_dir+'Cl_'+tag+str(N_start)+'_'+str(N_stop)+'_label.dat'
-    np.savetxt(path+out_cl, np.transpose(cl_list), header=text_cl, fmt='%1.4e')
+    np.savetxt(out_cl, np.transpose(cl_list), header=text_cl, fmt='%1.4e')
 
     print('Converting Power Spectrum to CCF...')
     for j in range(len(th_list)):
@@ -152,14 +148,14 @@ for i in range(N_start,N_stop+1):
 
     print('Writing CCF...')
     out_CCF = out_dir+'CCF_'+tag+str(N_start)+'_'+str(N_stop)+'_label.dat'
-    np.savetxt(path+out_CCF, np.transpose(CCF_list), header=text_CCF, fmt='%1.4e')
+    np.savetxt(out_CCF, np.transpose(CCF_list), header=text_CCF, fmt='%1.4e')
 
     print('Creating map from Power Spectrum...')
     out_name = out_dir+'msim_'+tag+str(i).zfill(4)+'.fits'
     msim = hp.synfast(cl_temp,NSIDE)
 
     print('Saving map...')
-    hp.write_map(path+out_name,msim,coord='G',fits_IDL=False,overwrite=True)
+    hp.write_map(out_name,msim,coord='G',fits_IDL=False,overwrite=True)
 
     print('Converting map to tif format...')
     moll_array = hp.cartview(msim, title=None, xsize=x_size, ysize=y_size, return_projected_map=True)
@@ -171,12 +167,12 @@ for i in range(N_start,N_stop+1):
 
     print('Saving tif map...')
     out_tif = out_dir+'msim_'+tag+str(i).zfill(4)+'_data.tif'
-    moll_image.save(path+out_tif)
+    moll_image.save(out_tif)
 
     print('Writing parameters file...')
     f.write(text)
     f.close()
-    sub.call(['cp',path+out_text_temp,path+out_text],) #shell=[bool])
+    sub.call(['cp',out_text_temp,out_text],) #shell=[bool])
 
     #print 'Partial time :',time.time()-t_start,'s\n'
     print('\n')

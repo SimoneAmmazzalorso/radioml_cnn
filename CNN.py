@@ -208,10 +208,6 @@ print('Running prediction:')
 pred = model.predict_generator(test_generator, verbose=1)
 target = np.asarray([*test_generator.labels.values()])[num2:]     # the * unpacks the dictionary_values-type
 
-#print(tag_res)
-#print(test_generator)
-#print(pred)
-#print(target)
 for k in range(target.shape[0]-1):
     # printing the outputs
     with open(path_results+'2-PCF_map_%05d.txt'%(k),'w') as stats:
