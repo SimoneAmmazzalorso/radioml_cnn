@@ -49,6 +49,9 @@ theta_max = args.theta_max
 fact = args.fact
 norm_tif = args.norm_tif
 
+if path is not '' and path[-1] is not '/':
+    path = path+'/'
+
 def normalization(moll_array):
     moll_array = moll_array + np.abs(np.min(moll_array))
     moll_array = moll_array/(np.max(moll_array))*255.0

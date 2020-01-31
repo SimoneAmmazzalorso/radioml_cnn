@@ -62,7 +62,7 @@ N_epochs = args.N_epochs
 batch_size = args.batch_size
 
 model_parameters = {'learning_rate': LR,      # 1E-5
-                       'decay_rate': 1E-5,      # 1E-4 # i.e. lr /= (1+decay_rate) after each epoch
+                       'decay_rate': 1E-5,      # 1E-5 # i.e. lr /= (1+decay_rate) after each epoch
                       'kernel_size': (5,5),
                         'pool_size': (4,4),
                            'stride': 1

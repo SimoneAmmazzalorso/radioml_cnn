@@ -23,7 +23,7 @@ RUN mkdir /archive && mkdir /archive/home && mkdir /archive/home/sammazza && mkd
 WORKDIR /run_CNN
 ADD CNN.py /run_CNN/CNN.py
 ADD utility/image_provider.py /run_CNN/utility/image_provider.py
-ADD utility/network.py /run_CNN/utility/network.py
+ADD utility/network_refined.py /run_CNN/utility/network_refined.py
 
 # Overwrite the entrypoint of the base Docker image (python)
 CMD ["/bin/bash","-c","/archive/home/sammazza/radioML/script.sh"]
