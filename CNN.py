@@ -234,11 +234,11 @@ target = np.asarray([*test_generator.labels.values()])[num2:]     # the * unpack
 
 for k in range(target.shape[0]-target.shape[0]%batch_size):
     # printing the outputs
-    with open(path_results+'2-PCF_map_%05d.txt'%(k),'w') as stats:
+    with open(path_results+'2-PCF_map_'+str(k).zfill(5)+tag_res+'.txt','w') as stats:
         stats.write('#theta  pred    target\n')
 
     for i in range(len(thetas)):
-        with open(path_results+'2-PCF_map_%05d.txt'%(k),'a') as stats:
+        with open(path_results+'2-PCF_map_'+str(k).zfill(5)+tag_res+'.txt','a') as stats:
             if norm_label:
                 stats.write('{:}    {:}    {:}\n'.format(thetas[i], pred[k,i]*max_value_label, target[k,i]*max_value_label))
             else:
