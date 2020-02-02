@@ -180,6 +180,7 @@ generator_parameters = {'path_data': path_train_data,
 
 # Definitions of the generators
 print('Definition of generators...')
+print(generator_parameters)
 training_generator   = image_provider.DataGenerator(partition['train'], labels, shuffle=True, **generator_parameters)
 validation_generator = image_provider.DataGenerator(partition['validation'], labels, shuffle=True, **generator_parameters)
 test_generator = image_provider.DataGenerator(partition['test'], labels, shuffle=False, **generator_parameters)

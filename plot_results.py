@@ -9,7 +9,8 @@ rcParams.update({'figure.autolayout': True})
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--tag_res", type=str, help="tag of the network results", default='')
-parser.add_argument("--path", type=str, help="general path of test results", default='/home/simone/RadioML/results/')
+parser.add_argument("--path", type=str, help="general path of results", default='/home/simone/RadioML/results/')
+parser.add_argument("--path_dest", type=str, help="path of plots", default='/home/simone/RadioML/plots/')
 parser.add_argument("--N_plot", type=int, help="number of plots to produce (default: 4)", default=4)
 
 args = parser.parse_args()
