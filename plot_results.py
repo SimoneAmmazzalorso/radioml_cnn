@@ -38,6 +38,6 @@ for i in range(N_plot):
     plt.tick_params(direction='in', width=2, length=5, axis='both', which='major', labelsize=30, pad=7)#,length=6,width=3)
     plt.tick_params(direction='in', width=2, length=5, axis='both', which='minor', labelsize=30, pad=7)#,length=6,width=3)
     plt.legend(loc='upper right',fontsize=30,framealpha=0.5,fancybox=True)
-    plt.savefig(path+'2-PCF_map_'+str(i).zfill(5)+tag_res+'.png')
+    plt.savefig(path_dest+'2-PCF_map_'+str(i).zfill(5)+tag_res+'.png')
     #plt.show()
     plt.clf()
