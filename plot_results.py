@@ -16,10 +16,35 @@ parser.add_argument("--N_plot", type=int, help="number of plots to produce (defa
 args = parser.parse_args()
 tag_res = args.tag_res
 path = args.path
+path_dest = args.path_dest
 N_plot = args.N_plot
 
 if tag_res is not '':
     tag_res = '_' + tag_res
+
+
+
+print('Creating Loss Plot:')
+dpi = 300
+try:
+    loss = np.transpose(np.genfromtxt(path+'/loss_function.txt', dtype=np.float32))
+
+    plt.plot(loss[0], loss[1], '.-')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    # plt.ylim((0,np.max(loss[1])*1.1))
+    plt.ylim((np.min(loss[1]),np.max(loss[1])*1.01))
+    # plt.ylim((0,0.015))
+    plt.xlim((np.min(loss[0]), np.max(loss[0])*1.01))
+    # plt.grid()
+    plt.savefig(path_dest+'/0_loss.png', dpi=dpi)
+    plt.close()
+except Exception as e:
+    print(e)
+
+print('Done.')
+
+
 
 for i in range(N_plot):
     plt.figure(figsize=(12,10))
@@ -41,3 +66,12 @@ for i in range(N_plot):
     plt.savefig(path_dest+'2-PCF_map_'+str(i).zfill(5)+tag_res+'.png')
     #plt.show()
     plt.clf()
+
+
+
+
+
+
+
+
+
