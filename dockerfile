@@ -16,7 +16,7 @@ RUN conda update -n base -c defaults conda
 RUN conda create -n tensorflow python=3.6 numpy==1.17.4 Pillow h5py
 
 ENV PATH /Miniconda3/envs/tensorflow/bin:$PATH
-RUN /bin/bash -c "source activate tensorflow" && pip uninstall tensorflow tensorflow-gpu && pip install tensorflow-gpu==1.14 keras==2.2.4 PyYAML==5.1
+RUN /bin/bash -c "source activate tensorflow" && pip uninstall tensorflow tensorflow-gpu && pip install tensorflow-gpu==1.14 keras==2.2.4 PyYAML==5.1 healpy
 
 #
 RUN mkdir /archive && mkdir /archive/home && mkdir /archive/home/sammazza && mkdir /archive/home/sammazza/radioML && mkdir /archive/home/sammazza/radioML/data && mkdir /run_CNN

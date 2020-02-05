@@ -22,12 +22,16 @@ N_plot = args.N_plot
 if tag_res is not '':
     tag_res = '_' + tag_res
 
+if path is not '' and path[-1] is not '/':
+    path = path + '/'
 
+if path_dest is not '' and path_dest[-1] is not '/':
+    path_dest = path_dest + '/'
 
 print('Creating Loss Plot:')
 dpi = 300
 try:
-    loss = np.transpose(np.genfromtxt(path+'/loss_function.txt', dtype=np.float32))
+    loss = np.transpose(np.genfromtxt(path+'loss_function'+tag_res+'.txt', dtype=np.float32))
 
     plt.plot(loss[0], loss[1], '.-')
     plt.ylabel('Loss')
@@ -37,14 +41,10 @@ try:
     # plt.ylim((0,0.015))
     plt.xlim((np.min(loss[0]), np.max(loss[0])*1.01))
     # plt.grid()
-    plt.savefig(path_dest+'/0_loss.png', dpi=dpi)
+    plt.savefig(path_dest+'loss'+tag_res+'.png', dpi=dpi)
     plt.close()
 except Exception as e:
     print(e)
-
-print('Done.')
-
-
 
 for i in range(N_plot):
     plt.figure(figsize=(12,10))
@@ -67,11 +67,4 @@ for i in range(N_plot):
     #plt.show()
     plt.clf()
 
-
-
-
-
-
-
-
-
+print('Done.')

@@ -24,7 +24,7 @@ parser.add_argument("--tag", type=str, help="tag of destination files.", default
 
 args = parser.parse_args()
 overwrite = args.overwrite
-x_size_old = args.xsize_old
+#x_size_old = args.xsize_old
 x_size_new = args.xsize_new
 fix_x = args.fix_x
 fix_y = args.fix_y
