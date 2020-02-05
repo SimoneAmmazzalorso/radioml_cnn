@@ -14,7 +14,6 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--overwrite", action='store_true', help="overwrite maps.")
-parser.add_argument("--xsize_old", type=int, help="xsize of the original tif figure.", default=2000)
 parser.add_argument("--xsize_new", type=int, help="xsize of the new tif figure.", default=200)
 parser.add_argument("--fix_x", type=int, help="fix x pixel.", default=-1)
 parser.add_argument("--fix_y", type=int, help="fix y pixel.", default=-1)
@@ -24,7 +23,6 @@ parser.add_argument("--tag", type=str, help="tag of destination files.", default
 
 args = parser.parse_args()
 overwrite = args.overwrite
-#x_size_old = args.xsize_old
 x_size_new = args.xsize_new
 fix_x = args.fix_x
 fix_y = args.fix_y
