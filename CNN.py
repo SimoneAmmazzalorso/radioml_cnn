@@ -45,6 +45,8 @@ norm_data = args.norm_data
 max_ID = args.max_ID
 suffix = args.suffix
 
+NN = 5 #starting theta
+
 refined = args.refined
 if refined:
     print('Using refined network.')
@@ -133,7 +135,7 @@ print('Testing on %i/%i images'
         %(len(partition['test']), len(partition['train'])+len(partition['validation'])+len(partition['test'])))
 
 # Reading the spectra.dat-file and store all spectra
-all_labels = np.transpose(np.genfromtxt(path_train_label, dtype=np.float32)[:,1:max_ID])
+all_labels = np.transpose(np.genfromtxt(path_train_label, dtype=np.float32)[NN:,1:max_ID])
 
 if len(all_labels)!=len(all_IDs):
    print('lenght labels:  lenght data:')
@@ -228,7 +230,9 @@ else:
 
 
 ## Testing ###########################################
-thetas = np.transpose(np.genfromtxt(path_train_label, dtype=np.float32)[:,0])
+thetas = np.transpose(np.genfromtxt(path_train_label, dtype=np.float32)[NN:,0])
+print('Theta list (deg):')
+print(thetas)
 print('Running prediction:')
 pred = model.predict_generator(test_generator, verbose=1)
 target = np.asarray([*test_generator.labels.values()])[num2:]     # the * unpacks the dictionary_values-type
