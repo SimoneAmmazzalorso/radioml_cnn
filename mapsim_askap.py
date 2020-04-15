@@ -241,8 +241,6 @@ for i in range(N_start,N_stop+1):
         from astropy.utils.data import get_pkg_data_filename
 
         for k, beam_id in enumerate(beam_ids):
-            # beam_file = get_pkg_data_filename(beam_id)
-            # beam_data = fits.getdata(beam_file, ext=0)
             with fits.open(beam_id) as hdul:
                 beam_data = hdul[0].data
 
@@ -276,7 +274,7 @@ for i in range(N_start,N_stop+1):
             out_tif = out_dir+'msim_'+tag+str(i).zfill(4)+'_'+str(declination).zfill(2)+'_data.tif'
             moll_image.save(out_tif)
 
-    else:
+    else: # If no beams are added, the map is saved once, as before
         #plt.savefig('/home/simone/RadioML/data/test/map_noise.png')
         if norm_tif:
             print('Applying normalization to map...')
